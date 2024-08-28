@@ -1,4 +1,15 @@
-body{
-  background-color: aqua;
-  height: 100vh;
+
+.div-1{
+  position:absolute;
+  background-color: rgba(0, 255, 255, 0);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  z-index: 0;
+}
+.div-2{
+  position: relative;
+  z-index: 5;
 }
