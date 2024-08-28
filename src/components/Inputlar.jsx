@@ -1,12 +1,45 @@
-import React, { useState } from "react";
-import data from "../json/data.json"; // JSON faylingizdan ma'lumotlar import qilinmoqda
+import React, { useEffect, useState } from "react";
+import datas from "../json/data.json";
 
 function Inputlar() {
-  const [showDropdown, setShowDropdown] = useState(true);
-  const [selectedCurrency, setSelectedCurrency] = useState(data[0]);
-  const [malumod, setMalumod] = useState(null);
-console.log(selectedCurrency)
-  // countries ni data.json dan olinadi
+  const [data, setData] = useState(datas);
+  const [showDropdownFrom, setShowDropdownFrom] = useState(false);
+  const [selectedCurrencyFrom, setSelectedCurrencyFrom] = useState(null);
+  const [searchTermFrom, setSearchTermFrom] = useState("");
+  
+  const [showDropdownTo, setShowDropdownTo] = useState(false);
+  const [selectedCurrencyTo, setSelectedCurrencyTo] = useState(null);
+  const [searchTermTo, setSearchTermTo] = useState("");
+
+  function filter(name) {
+    const filteredData = datas.filter(e =>
+      e.name.toLowerCase().includes(name.toLowerCase())
+    );
+    setData(filteredData);
+  }
+
+  const handleSearchChangeFrom = (event) => {
+    const value = event.target.value;
+    setSearchTermFrom(value);
+    filter(value); 
+  };
+
+  const handleSearchChangeTo = (event) => {
+    const value = event.target.value;
+    setSearchTermTo(value);
+    filter(value); 
+  };
+
+  const handleCurrencySelectFrom = (currency) => {
+    setSelectedCurrencyFrom(currency);
+    setShowDropdownFrom(false);
+  };
+
+  const handleCurrencySelectTo = (currency) => {
+    setSelectedCurrencyTo(currency);
+    setShowDropdownTo(false);
+  };
+
   const currencies = data.flatMap(e => {
     if (e.currencies) {
       return Object.entries(e.currencies).map(([code, info]) => ({
@@ -16,14 +49,8 @@ console.log(selectedCurrency)
         country: e.name,
       }));
     }
-    return []; // Agar currencies mavjud bo'lmasa, bo'sh massiv qaytarish
+    return [];
   });
-
-  const handleCurrencySelect = (currency) => {
-    setSelectedCurrency(currency);
-    setMalumod(currency); // Tanlangan valyuta ma'lumotini saqlash
-    setShowDropdown(true);
-  };
 
   return (
     <div className="max-w-[1122px] mx-auto bg-[#f7f7f7] rounded-[10px] drop-shadow-md">
@@ -36,51 +63,99 @@ console.log(selectedCurrency)
       <div className="p-[48px]">
         <div className="flex justify-between">
           <div className="flex flex-col w-[32%]">
-            <label className="text-[16px] font-[600] text-[#141e37] mb-[5px]" htmlFor="">
+            <label className="text-[16px] font-[600] text-[#141e37] mb-[5px]">
               Amount
             </label>
             <input className="border-[1px] rounded-[7px] pl-[10px] border-[#aba8a8] h-[52px] w-[100%]" type="text" />
           </div>
           <div className="flex flex-col w-[32%]">
-            <label className="text-[16px] font-[600] text-[#141e37] mb-[5px]" htmlFor="">
+            <label className="text-[16px] font-[600] text-[#141e37] mb-[5px]">
               From
             </label>
             <div className="border-[1px] rounded-[7px] pl-[10px] border-[#aba8a8] h-[52px] w-[100%] relative">
-              {/* <div className="flex items-center justify-between cursor-pointer">
-                <button className="w-[10%] flex items-center justify-center">
-                  <svg className="w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-                    <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-                  </svg>
-                </button>
-              </div> */}
-              {showDropdown && (
-                <div>
-                  <div className="flex items-center w-[200px] h-[52px]">
-                    <img className="w-[40px] mr-2" src={selectedCurrency.flag} alt="" />
-                    <h1 className="font-[600] text-[16px]"> {selectedCurrency.code} - {selectedCurrency.name}</h1>
-                  </div>
-                <div className="absolute top-full left-0 right-0 bg-white border border-[#aba8a8] rounded-[7px] max-h-[200px] overflow-auto">
-                  {currencies.map((currency,id) => (
-                    <div 
-                      key={id} 
-                      className="flex items-center p-2 cursor-pointer hover:bg-[#f0f0f0]"
-                      onClick={() => handleCurrencySelect(currency)}
-                    >
-                      <img className="w-6 mr-2" src={currency.flag} alt={`${currency.country} flag`} />
-                      <p className="text-[16px] font-[600]">{currency.code} - {currency.name}</p>
+              <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowDropdownFrom(!showDropdownFrom)}>
+                <div className="flex w-[100%] h-[52px]">
+                  {selectedCurrencyFrom && !showDropdownFrom && (
+                    <div className="flex items-center">
+                      <img className="w-[40px] mr-2" src={selectedCurrencyFrom.flag} alt="" />
+                      <h1 className="font-[600] text-[16px] w-[100%] flex">
+                        {selectedCurrencyFrom.code} - {selectedCurrencyFrom.name}
+                      </h1>
                     </div>
-                  ))}
+                  )}
+                  {!selectedCurrencyFrom && !showDropdownFrom&&<h1 className="font-[600] text-[16px] mt-3">Select a currency</h1>}
                 </div>
+              </div>
+              {showDropdownFrom && (
+                <div>
+                  <div className="z-50 mt-[-54px]">
+                    <input 
+                      className="w-[90%] h-[52px] outline-none bg-[#0000] text-[16px] font-[600] pl-2"
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTermFrom}
+                      onChange={handleSearchChangeFrom}
+                    />
+                  </div>
+                  <div className="absolute top-full left-0 right-0 bg-white border border-[#aba8a8] rounded-[7px] max-h-[400px] overflow-auto mt-3">
+                    {currencies.map((currency, id) => (
+                      <div
+                        key={id}
+                        className="flex items-center p-2 cursor-pointer hover:bg-[#f0f0f0]"
+                        onClick={() => handleCurrencySelectFrom(currency)}
+                      >
+                        <img className="w-6 mr-2" src={currency.flag} alt={`${currency.country} flag`} />
+                        <p className="text-[16px] font-[600]">{currency.code} - {currency.name}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
           <div className="flex flex-col w-[32%]">
-            <label className="text-[16px] font-[600] text-[#141e37] mb-[5px]" htmlFor="">
+            <label className="text-[16px] font-[600] text-[#141e37] mb-[5px]">
               To
             </label>
-            <div className="border-[1px] rounded-[7px] pl-[10px] border-[#aba8a8] h-[52px] w-[100%]">
-              {/* Similar logic as 'From' dropdown can be applied here */}
+            <div className="border-[1px] rounded-[7px] pl-[10px] border-[#aba8a8] h-[52px] w-[100%] relative">
+              <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowDropdownTo(!showDropdownTo)}>
+                <div className="flex w-[100%] h-[52px]">
+                  {selectedCurrencyTo && !showDropdownTo && (
+                    <div className="flex items-center">
+                      <img className="w-[40px] mr-2" src={selectedCurrencyTo.flag} alt="" />
+                      <h1 className="font-[600] text-[16px] w-[100%] flex">
+                        {selectedCurrencyTo.code} - {selectedCurrencyTo.name}
+                      </h1>
+                    </div>
+                  )}
+                  {!selectedCurrencyTo && !showDropdownTo&&<h1 className="font-[600] text-[16px] mt-3">Select a currency</h1>}
+                </div>
+              </div>
+              {showDropdownTo && (
+                <div>
+                  <div className="z-50 mt-[-54px]">
+                    <input 
+                      className="w-[90%] h-[52px] outline-none bg-[#0000] text-[16px] font-[600] pl-2"
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTermTo}
+                      onChange={handleSearchChangeTo}
+                    />
+                  </div>
+                  <div className="absolute top-full left-0 right-0 bg-white border border-[#aba8a8] rounded-[7px] max-h-[400px] overflow-auto mt-3">
+                    {currencies.map((currency, id) => (
+                      <div
+                        key={id}
+                        className="flex items-center p-2 cursor-pointer hover:bg-[#f0f0f0]"
+                        onClick={() => handleCurrencySelectTo(currency)}
+                      >
+                        <img className="w-6 mr-2" src={currency.flag} alt={`${currency.country} flag`} />
+                        <p className="text-[16px] font-[600]">{currency.code} - {currency.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
